@@ -51,6 +51,7 @@ class UserController extends Controller
 
     $user = User::create([
         'name' => $request->name,
+        'user_number' =>null,
         'email' => $request->email,
         'phone' => $request->phone,
         'role' => $request->role,
@@ -63,38 +64,52 @@ class UserController extends Controller
     $lastName = $nameParts[1] ?? '';
 
     if ($request->role === 'admin') {
-        Admin::create([
-            'user_id' => $user->id,
-            'admin_number'=>'ADM'.str_pad($user->id,4,'0',STR_PAD_LEFT),
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'status' => 1,
-        ]);
-    }
+    Admin::create([
+        'user_id' => $user->id,
+        'admin_number' => 'ADM' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'gender' => 'male',
+        'phone' => $request->phone,
+        'email' => $request->email,
+        'address' => 'Not provided',
+        'job_title' => 'Administrator',
+        'hire_date' => now()->toDateString(),
+        'status' => 1,
+    ]);
+}
 
     if ($request->role === 'receptionist') {
-        Receptionist::create([
-            'user_id' => $user->id,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'status' => 1,
-        ]);
-    }
+    Receptionist::create([
+        'user_id' => $user->id,
+        'receptionist_number' => 'REC' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'gender' => 'male',
+        'phone' => $request->phone,
+        'email' => $request->email,
+        'address' => 'Not provided',
+        'shift' => 'Day',
+        'hire_date' => now()->toDateString(),
+        'status' => 1,
+    ]);
+}
 
     if ($request->role === 'cashier') {
-        Cashier::create([
-            'user_id' => $user->id,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'status' => 1,
-        ]);
-    }
+    Cashier::create([
+        'user_id' => $user->id,
+        'cashier_number' => 'CAS' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'gender' => 'male',
+        'phone' => $request->phone,
+        'email' => $request->email,
+        'address' => 'Not provided',
+        'shift' => 'Day',
+        'hire_date' => now()->toDateString(),
+        'status' => 1,
+    ]);
+}
 
     if ($request->role === 'patient') {
         $patient = Patient::create([
