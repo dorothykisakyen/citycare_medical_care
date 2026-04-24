@@ -65,6 +65,7 @@ class UserController extends Controller
     if ($request->role === 'admin') {
         Admin::create([
             'user_id' => $user->id,
+            'admin_number'=>'ADM'.time(),
             'first_name' => $firstName,
             'last_name' => $lastName,
             'phone' => $request->phone,
