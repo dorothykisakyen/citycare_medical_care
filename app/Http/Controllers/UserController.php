@@ -75,7 +75,7 @@ class UserController extends Controller
         'address' => 'Not provided',
         'job_title' => 'Administrator',
         'hire_date' => now()->toDateString(),
-        'status' => 1,
+        'is_active' => 1,
     ]);
 }
 
@@ -91,7 +91,7 @@ class UserController extends Controller
         'address' => 'Not provided',
         'shift' => 'Day',
         'hire_date' => now()->toDateString(),
-        'status' => 1,
+        'is_active' => 1,
     ]);
 }
 
@@ -107,7 +107,7 @@ class UserController extends Controller
         'address' => 'Not provided',
         'shift' => 'Day',
         'hire_date' => now()->toDateString(),
-        'status' => 1,
+        'is_active' => 1,
     ]);
 }
 
@@ -121,7 +121,7 @@ class UserController extends Controller
             'date_of_birth' => now()->subYears(18)->toDateString(),
             'phone' => $request->phone,
             'email' => $request->email,
-            'status' => 1,
+            'is_active' => 1,
         ]);
 
         $patient->patient_number = 'PAT-' . str_pad($patient->id, 4, '0', STR_PAD_LEFT);
