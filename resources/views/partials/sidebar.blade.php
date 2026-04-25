@@ -159,14 +159,6 @@
         </a>
     </li>
 
-    <li>
-        <a href="{{ route('patient.profile') }}"
-           class="sidebar-link {{ request()->routeIs('patient.profile') ? 'active' : '' }}">
-            <i class="fa-solid fa-user"></i>
-            <span>My Profile</span>
-        </a>
-    </li>
-
 @endif
 
     </ul>
