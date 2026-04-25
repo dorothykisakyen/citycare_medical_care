@@ -16,8 +16,9 @@
             @include('doctors._form')
 
             <div class="mt-4 d-flex justify-content-end gap-2">
-                <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-2"></i>Save Doctor</button>
-            <a href="{{ route('patients.index') }}" class="btn btn-outline-secondary">Back</a>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-2"></i>Save Doctor</button>
+
+                <a href="{{ route('doctors.index') }}" class="btn btn-outline-secondary">Back</a>
             </div>
         </form>
     </div>

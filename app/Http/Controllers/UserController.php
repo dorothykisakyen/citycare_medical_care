@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Cashier;
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Receptionist;
 use App\Models\User;
@@ -48,6 +49,9 @@ class UserController extends Controller
             'role' => 'required|in:admin,receptionist,doctor,cashier,patient',
             'is_active' => 'required|in:1,0',
             'password' => 'required|min:6|confirmed',
+
+            'department_id' => 'required_if:role,doctor|nullable|exists:departments,id',
+            'specialization' => 'nullable|string|max:255',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -75,6 +79,24 @@ class UserController extends Controller
                     'email' => $request->email,
                     'address' => 'Not provided',
                     'job_title' => 'Administrator',
+                    'hire_date' => now()->toDateString(),
+                    'status' => 1,
+                ]);
+            }
+
+            if ($request->role === 'doctor') {
+                Doctor::create([
+                    'user_id' => $user->id,
+                    'department_id' => $request->department_id,
+                    'doctor_number' => 'DOC' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'gender' => 'male',
+                    'phone' => $request->phone ?? 'Not provided',
+                    'email' => $request->email,
+                    'specialization' => $request->specialization ?? 'General Medicine',
+                    'consultation_fee' => 0,
+                    'room_number' => null,
                     'hire_date' => now()->toDateString(),
                     'status' => 1,
                 ]);

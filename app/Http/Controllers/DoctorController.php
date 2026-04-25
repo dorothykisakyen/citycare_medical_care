@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DoctorController extends Controller
 {
@@ -49,7 +51,6 @@ class DoctorController extends Controller
     public function create()
     {
         $departments = Department::where('status', 1)
-            ->orWhere('status', 'active')
             ->orderBy('name')
             ->get();
 
@@ -64,7 +65,7 @@ class DoctorController extends Controller
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:male,female,other',
             'phone' => 'required|string|max:20',
-            'email' => 'required|email|unique:doctors,email',
+            'email' => 'required|email|unique:users,email|unique:doctors,email',
             'specialization' => 'nullable|string|max:255',
             'consultation_fee' => 'nullable|numeric|min:0',
             'room_number' => 'nullable|string|max:50',
@@ -73,31 +74,44 @@ class DoctorController extends Controller
         ]);
 
         try {
-            $doctor = Doctor::create([
-                'user_id' =>Auth::id(),
-                'doctor_number' => null,
-                'department_id' => $request->department_id,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'gender' => $request->gender,
-                'phone' => $request->phone,
-                'email' => $request->email,
-                'specialization' => $request->specialization,
-                'consultation_fee' => $request->consultation_fee,
-                'room_number' => $request->room_number,
-                'hire_date' => $request->hire_date,
-                'status' => $request->status,
-            ]);
+            DB::transaction(function () use ($request) {
+                $user = User::create([
+                    'name' => $request->first_name . ' ' . $request->last_name,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'role' => 'doctor',
+                    'is_active' => $request->status,
+                    'password' => Hash::make('password123'),
+                ]);
 
-            $doctor->doctor_number = 'DOC-' . str_pad($doctor->id, 4, '0', STR_PAD_LEFT);
-            $doctor->save();
+                $doctor = Doctor::create([
+                    'user_id' => $user->id,
+                    'doctor_number' => 'TEMP-DOC-' . $user->id,
+                    'department_id' => $request->department_id,
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'gender' => $request->gender,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'specialization' => $request->specialization ?? 'General Medicine',
+                    'consultation_fee' => $request->consultation_fee ?? 0,
+                    'room_number' => $request->room_number,
+                    'hire_date' => $request->hire_date ?? now()->toDateString(),
+                    'status' => $request->status,
+                ]);
+
+                $doctor->doctor_number = 'DOC-' . str_pad($doctor->id, 4, '0', STR_PAD_LEFT);
+                $doctor->save();
+            });
 
             return redirect()->route('doctors.index')
-                ->with('success', 'Doctor created successfully.');
+                ->with('success', 'Doctor created successfully. Default password is password123.');
+
         } catch (QueryException $e) {
             return back()
                 ->withInput()
                 ->with('error', 'Database error. Please try again.');
+
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -107,15 +121,14 @@ class DoctorController extends Controller
 
     public function show(Doctor $doctor)
     {
-    $departments = Department::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
 
-    return view('doctors.show', compact('doctor', 'departments'));
+        return view('doctors.show', compact('doctor', 'departments'));
     }
 
     public function edit(Doctor $doctor)
     {
         $departments = Department::where('status', 1)
-            ->orWhere('status', 'active')
             ->orderBy('name')
             ->get();
 
@@ -130,7 +143,7 @@ class DoctorController extends Controller
             'last_name' => 'required|string|max:255',
             'gender' => 'required|in:male,female,other',
             'phone' => 'required|string|max:20',
-            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'email' => 'required|email|unique:doctors,email,' . $doctor->id . '|unique:users,email,' . $doctor->user_id,
             'specialization' => 'nullable|string|max:255',
             'consultation_fee' => 'nullable|numeric|min:0',
             'room_number' => 'nullable|string|max:50',
@@ -139,22 +152,35 @@ class DoctorController extends Controller
         ]);
 
         try {
-            $doctor->update($request->only([
-                'department_id',
-                'first_name',
-                'last_name',
-                'gender',
-                'phone',
-                'email',
-                'specialization',
-                'consultation_fee',
-                'room_number',
-                'hire_date',
-                'status',
-            ]));
+            DB::transaction(function () use ($request, $doctor) {
+                $doctor->update([
+                    'department_id' => $request->department_id,
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'gender' => $request->gender,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'specialization' => $request->specialization ?? 'General Medicine',
+                    'consultation_fee' => $request->consultation_fee ?? 0,
+                    'room_number' => $request->room_number,
+                    'hire_date' => $request->hire_date,
+                    'status' => $request->status,
+                ]);
+
+                if ($doctor->user) {
+                    $doctor->user->update([
+                        'name' => $request->first_name . ' ' . $request->last_name,
+                        'email' => $request->email,
+                        'phone' => $request->phone,
+                        'role' => 'doctor',
+                        'is_active' => $request->status,
+                    ]);
+                }
+            });
 
             return redirect()->route('doctors.index')
                 ->with('success', 'Doctor updated successfully.');
+
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -165,10 +191,17 @@ class DoctorController extends Controller
     public function destroy(Doctor $doctor)
     {
         try {
-            $doctor->delete();
+            DB::transaction(function () use ($doctor) {
+                if ($doctor->user) {
+                    $doctor->user->delete();
+                }
+
+                $doctor->delete();
+            });
 
             return redirect()->route('doctors.index')
                 ->with('success', 'Doctor deleted successfully.');
+
         } catch (\Exception $e) {
             return back()
                 ->with('error', 'Failed to delete doctor.');
