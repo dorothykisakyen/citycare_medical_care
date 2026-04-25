@@ -11,10 +11,14 @@ class Cashier extends Model
 
     protected $fillable = [
         'user_id',
+        'cashier_number',
         'first_name',
         'last_name',
+        'gender',
         'phone',
         'email',
+        'shift',
+        'hire_date',
         'status',
     ];
 

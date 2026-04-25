@@ -11,10 +11,15 @@ class Admin extends Model
 
     protected $fillable = [
         'user_id',
+        'admin_number',
         'first_name',
         'last_name',
+        'gender',
         'phone',
         'email',
+        'address',
+        'job_title',	
+        'hire_date',
         'status',
     ];
 

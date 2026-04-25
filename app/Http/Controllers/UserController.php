@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Models\Cashier;
-use App\Models\Receptionist;
 use App\Models\Patient;
+use App\Models\Receptionist;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -39,97 +40,99 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'phone' => 'nullable|string|max:20',
-        'role' => 'required|in:admin,receptionist,doctor,cashier,patient',
-        'is_active' => 'required|in:1,0',
-        'password' => 'required|min:6|confirmed',
-    ]);
-
-    $user = User::create([
-        'name' => $request->name,
-        'user_number' =>null,
-        'email' => $request->email,
-        'phone' => $request->phone,
-        'role' => $request->role,
-        'is_active' => $request->is_active,
-        'password' => Hash::make($request->password),
-    ]);
-
-    $nameParts = explode(' ', $request->name, 2);
-    $firstName = $nameParts[0];
-    $lastName = $nameParts[1] ?? '';
-
-    if ($request->role === 'admin') {
-    Admin::create([
-        'user_id' => $user->id,
-        'admin_number' => 'ADM' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
-        'first_name' => $firstName,
-        'last_name' => $lastName,
-        'gender' => 'male',
-        'phone' => $request->phone,
-        'email' => $request->email,
-        'address' => 'Not provided',
-        'job_title' => 'Administrator',
-        'hire_date' => now()->toDateString(),
-        'is_active' => 1,
-    ]);
-}
-
-    if ($request->role === 'receptionist') {
-    Receptionist::create([
-        'user_id' => $user->id,
-        'receptionist_number' => 'REC' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
-        'first_name' => $firstName,
-        'last_name' => $lastName,
-        'gender' => 'male',
-        'phone' => $request->phone,
-        'email' => $request->email,
-        'address' => 'Not provided',
-        'shift' => 'Day',
-        'hire_date' => now()->toDateString(),
-        'is_active' => 1,
-    ]);
-}
-
-    if ($request->role === 'cashier') {
-    Cashier::create([
-        'user_id' => $user->id,
-        'cashier_number' => 'CAS' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
-        'first_name' => $firstName,
-        'last_name' => $lastName,
-        'gender' => 'male',
-        'phone' => $request->phone,
-        'email' => $request->email,
-        'address' => 'Not provided',
-        'shift' => 'Day',
-        'hire_date' => now()->toDateString(),
-        'is_active' => 1,
-    ]);
-}
-
-    if ($request->role === 'patient') {
-        $patient = Patient::create([
-            'user_id' => $user->id,
-            'patient_number' => null,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'gender' => 'male',
-            'date_of_birth' => now()->subYears(18)->toDateString(),
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'is_active' => 1,
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'role' => 'required|in:admin,receptionist,doctor,cashier,patient',
+            'is_active' => 'required|in:1,0',
+            'password' => 'required|min:6|confirmed',
         ]);
 
-        $patient->patient_number = 'PAT-' . str_pad($patient->id, 4, '0', STR_PAD_LEFT);
-        $patient->save();
-    }
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => $request->role,
+                'is_active' => $request->is_active,
+                'password' => Hash::make($request->password),
+            ]);
 
-    return redirect()->route('users.index')->with('success', 'User created successfully.');
-}
+            $nameParts = explode(' ', $request->name, 2);
+            $firstName = $nameParts[0];
+            $lastName = $nameParts[1] ?? '';
+
+            if ($request->role === 'admin') {
+                Admin::create([
+                    'user_id' => $user->id,
+                    'admin_number' => 'ADM' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'gender' => 'male',
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'address' => 'Not provided',
+                    'job_title' => 'Administrator',
+                    'hire_date' => now()->toDateString(),
+                    'status' => 1,
+                ]);
+            }
+
+            if ($request->role === 'receptionist') {
+                Receptionist::create([
+                    'user_id' => $user->id,
+                    'receptionist_number' => 'REC' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'gender' => 'male',
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'address' => 'Not provided',
+                    'shift' => 'Day',
+                    'hire_date' => now()->toDateString(),
+                    'status' => 1,
+                ]);
+            }
+
+            if ($request->role === 'cashier') {
+                Cashier::create([
+                    'user_id' => $user->id,
+                    'cashier_number' => 'CAS' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'gender' => 'male',
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'address' => 'Not provided',
+                    'shift' => 'Day',
+                    'hire_date' => now()->toDateString(),
+                    'status' => 1,
+                ]);
+            }
+
+            if ($request->role === 'patient') {
+                $patient = Patient::create([
+                    'user_id' => $user->id,
+                    'patient_number' => null,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'gender' => 'male',
+                    'date_of_birth' => now()->subYears(18)->toDateString(),
+                    'blood_group' => null,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'status' => 1,
+                ]);
+
+                $patient->patient_number = 'PAT' . str_pad($patient->id, 4, '0', STR_PAD_LEFT);
+                $patient->save();
+            }
+        });
+
+        return redirect()->route('users.index')->with('success', 'User created successfully.');
+    }
 
     public function edit(User $user)
     {
