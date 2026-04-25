@@ -148,24 +148,13 @@
             </li>
         @endif
 
-       {{-- Patient Navigation --}}
-      @if($role === 'patient')
-
-         <li>
-            <a href="{{ route('dashboard.patient') }}"class="sidebar-link {{ request()->routeIs('dashboard.patient') ? 'active' : '' }}">
-               <i class="fa-solid fa-gauge"></i>
-        <span>Dashboard</span>
-            </a>
-       </li>
-
-        <li>
-           <a href="{{ route('patient.profile') }}"class="sidebar-link {{ request()->routeIs('patient.profile') ? 'active' : '' }}">
-              <i class="fa-solid fa-user"></i>
-        <span>My Profile</span>
-    </a>
-</li>
-
-@endif
+        {{-- Patient: own dashboard only --}} 
+        @if($role === 'patient') 
+        <li> <a href="{{ route('dashboard.patient') }}" 
+        class="sidebar-link {{ request()->routeIs('dashboard.patient') ? 'active' : '' }}"> 
+            <i class="fa-solid fa-user"></i> <span>My Profile</span> </a> 
+        </li> 
+        @endif
 
     </ul>
 </aside>
