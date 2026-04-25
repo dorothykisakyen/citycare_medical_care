@@ -46,9 +46,13 @@ class PatientController extends Controller
         ]);
 
         try {
-            // Step 1: Create without patient_number
+            /*
+             Step 1:
+             Create patient first using temporary patient number
+             so database can generate id
+            */
             $patient = Patient::create([
-                'patient_number' => null,
+                'patient_number' => 'TEMP',
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'gender' => $request->gender,
@@ -56,14 +60,16 @@ class PatientController extends Controller
                 'blood_group' => $request->blood_group,
                 'phone' => $request->phone,
                 'email' => $request->email,
-                'registration_date' =>$request->registration_date??now()->toDateString(),
+                'registration_date' => $request->registration_date ?? now()->toDateString(),
                 'address' => $request->address,
                 'emergency_contact_name' => $request->emergency_contact_name,
                 'emergency_contact_phone' => $request->emergency_contact_phone,
                 'status' => $request->status,
             ]);
 
-            // Step 2: Generate patient number from ID
+            /*
+             Auto-generate patient number from database ID
+            */
             $patient->patient_number = 'PAT-' . str_pad($patient->id, 4, '0', STR_PAD_LEFT);
             $patient->save();
 
@@ -74,6 +80,7 @@ class PatientController extends Controller
             return back()
                 ->withInput()
                 ->with('error', 'Database error. Please try again.');
+
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -109,20 +116,20 @@ class PatientController extends Controller
         ]);
 
         try {
-            $patient->update($request->only([
-                'user_id',
-                'first_name',
-                'last_name',
-                'gender',
-                'date_of_birth',
-                'blood_group',
-                'phone',
-                'email',
-                'address',
-                'emergency_contact_name',
-                'emergency_contact_phone',
-                'status',
-            ]));
+            $patient->update([
+                'user_id' => $request->user_id,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'gender' => $request->gender,
+                'date_of_birth' => $request->date_of_birth,
+                'blood_group' => $request->blood_group,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address,
+                'emergency_contact_name' => $request->emergency_contact_name,
+                'emergency_contact_phone' => $request->emergency_contact_phone,
+                'status' => $request->status,
+            ]);
 
             return redirect()->route('patients.index')
                 ->with('success', 'Patient updated successfully.');
