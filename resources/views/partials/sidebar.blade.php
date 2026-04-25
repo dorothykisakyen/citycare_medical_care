@@ -148,17 +148,26 @@
             </li>
         @endif
 
-        <a href="{{ route('patient.dashboard') }}"
-   class="sidebar-link {{ request()->routeIs('patient.dashboard') ? 'active' : '' }}">
-    <i class="fa-solid fa-gauge"></i>
-    <span>Dashboard</span>
-</a>
+        {{-- Patient Navigation --}}
+@if($role === 'patient')
 
-<a href="{{ route('patient.profile') }}"
-   class="sidebar-link {{ request()->routeIs('patient.profile') ? 'active' : '' }}">
-    <i class="fa-solid fa-user"></i>
-    <span>My Profile</span>
-</a>
+    <li>
+        <a href="{{ route('dashboard.patient') }}"
+           class="sidebar-link {{ request()->routeIs('dashboard.patient') ? 'active' : '' }}">
+            <i class="fa-solid fa-gauge"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ route('patient.profile') }}"
+           class="sidebar-link {{ request()->routeIs('patient.profile') ? 'active' : '' }}">
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+        </a>
+    </li>
+
+@endif
 
     </ul>
 </aside>
