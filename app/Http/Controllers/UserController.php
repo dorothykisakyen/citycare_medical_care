@@ -60,9 +60,9 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $nameParts = explode(' ', $request->name, 2);
+            $nameParts = explode(' ', trim($request->name), 2);
             $firstName = $nameParts[0];
-            $lastName = $nameParts[1] ?? '';
+            $lastName = $nameParts[1] ?? 'Not provided';
 
             if ($request->role === 'admin') {
                 Admin::create([
@@ -71,7 +71,7 @@ class UserController extends Controller
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'gender' => 'male',
-                    'phone' => $request->phone,
+                    'phone' => $request->phone ?? 'Not provided',
                     'email' => $request->email,
                     'address' => 'Not provided',
                     'job_title' => 'Administrator',
@@ -87,7 +87,7 @@ class UserController extends Controller
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'gender' => 'male',
-                    'phone' => $request->phone,
+                    'phone' => $request->phone ?? 'Not provided',
                     'email' => $request->email,
                     'address' => 'Not provided',
                     'shift' => 'Day',
@@ -103,7 +103,7 @@ class UserController extends Controller
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'gender' => 'male',
-                    'phone' => $request->phone,
+                    'phone' => $request->phone ?? 'Not provided',
                     'email' => $request->email,
                     'address' => 'Not provided',
                     'shift' => 'Day',
@@ -115,13 +115,13 @@ class UserController extends Controller
             if ($request->role === 'patient') {
                 $patient = Patient::create([
                     'user_id' => $user->id,
-                    'patient_number' => null,
+                    'patient_number' => 'TEMP-' . $user->id,
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'gender' => 'male',
                     'date_of_birth' => now()->subYears(18)->toDateString(),
                     'blood_group' => null,
-                    'phone' => $request->phone,
+                    'phone' => $request->phone ?? 'Not provided',
                     'email' => $request->email,
                     'status' => 1,
                 ]);
