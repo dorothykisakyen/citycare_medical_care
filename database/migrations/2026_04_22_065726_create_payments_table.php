@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('appointment_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('patient_id')->constrained('patients')->cascadeOnDelete();
+            $table->foreignId('appointment_id')->nullable()->constrained('appointments')->nullOnDelete();
             $table->foreignId('cashier_id')->nullable()->constrained('cashiers')->nullOnDelete();
             $table->decimal('amount', 10, 2);
             $table->enum('payment_method', ['cash', 'mobile_money', 'card', 'bank']);

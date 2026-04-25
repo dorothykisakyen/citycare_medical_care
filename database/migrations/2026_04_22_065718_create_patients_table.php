@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->unique()->constrained()->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->unique()->constrained('users')->nullOnDelete();
             $table->string('patient_number')->unique();
             $table->string('first_name');
             $table->string('last_name');
@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('date_of_birth');
             $table->string('blood_group')->nullable();
             $table->string('phone');
-            $table->string('email')->nullable()->unique();
+            $table->string('email')->nullable();
             $table->text('address')->nullable();
             $table->string('emergency_contact_name')->nullable();
             $table->string('emergency_contact_phone')->nullable();

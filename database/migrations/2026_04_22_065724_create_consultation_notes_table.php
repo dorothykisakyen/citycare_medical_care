@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('consultation_notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('appointment_id')->unique()->constrained()->cascadeOnDelete();
-            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('appointment_id')->unique()->constrained('appointments')->cascadeOnDelete();
+            $table->foreignId('patient_id')->constrained('patients')->cascadeOnDelete();
+            $table->foreignId('doctor_id')->constrained('doctors')->cascadeOnDelete();
             $table->text('symptoms')->nullable();
             $table->text('diagnosis')->nullable();
             $table->text('prescription')->nullable();

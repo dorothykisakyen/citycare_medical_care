@@ -56,6 +56,7 @@ class PatientController extends Controller
                 'blood_group' => $request->blood_group,
                 'phone' => $request->phone,
                 'email' => $request->email,
+                'registration_date' =>$request->registration_date??now()->toDateString(),
                 'address' => $request->address,
                 'emergency_contact_name' => $request->emergency_contact_name,
                 'emergency_contact_phone' => $request->emergency_contact_phone,
