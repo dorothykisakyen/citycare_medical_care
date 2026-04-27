@@ -48,11 +48,6 @@
                 {{ old('gender', $doctor->gender ?? '') == 'female' ? 'selected' : '' }}>
                 Female
             </option>
-
-            <option value="other"
-                {{ old('gender', $doctor->gender ?? '') == 'other' ? 'selected' : '' }}>
-                Other
-            </option>
         </select>
     </div>
 
