@@ -17,7 +17,8 @@ class PaymentController extends Controller
         $method = $request->payment_method;
 
         $payments = Payment::when($search, function ($query) use ($search) {
-                $query->where('payment_number', 'like', "%{$search}%");
+                $query->where('payment_number', 'like', "%{$search}%")
+                      ->orWhere('transaction_reference', 'like', "%{$search}%");
             })
             ->when($status, function ($query) use ($status) {
                 $query->where('status', $status);
@@ -48,24 +49,21 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:cash,bank,mobile_money,card',
             'payment_date' => 'required|date',
             'status' => 'required|in:paid,pending,failed',
-            'reference' => 'nullable|string|max:255',
+            'transaction_reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
         ]);
 
         Payment::create([
             'payment_number' => 'PAY-' . str_pad((Payment::max('id') ?? 0) + 1, 4, '0', STR_PAD_LEFT),
             'patient_id' => $request->patient_id,
             'appointment_id' => $request->appointment_id,
-
-            // Saves the cashier table ID, not the user ID
             'cashier_id' => auth()->user()->cashier?->id,
-
             'amount' => $request->amount,
             'payment_method' => $request->payment_method,
             'payment_date' => $request->payment_date,
             'status' => $request->status,
-            'reference' => $request->reference,
-
-            // Saves the logged-in user ID
+            'transaction_reference' => $request->transaction_reference,
+            'notes' => $request->notes,
             'received_by' => Auth::id(),
         ]);
 
@@ -97,7 +95,8 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:cash,bank,mobile_money,card',
             'payment_date' => 'required|date',
             'status' => 'required|in:paid,pending,failed',
-            'reference' => 'nullable|string|max:255',
+            'transaction_reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
         ]);
 
         $payment->update([
@@ -107,7 +106,8 @@ class PaymentController extends Controller
             'payment_method' => $request->payment_method,
             'payment_date' => $request->payment_date,
             'status' => $request->status,
-            'reference' => $request->reference,
+            'transaction_reference' => $request->transaction_reference,
+            'notes' => $request->notes,
         ]);
 
         return redirect()->route('payments.index')
