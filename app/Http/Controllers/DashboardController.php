@@ -66,19 +66,29 @@ class DashboardController extends Controller
     }
 
     public function receptionist()
-    {
-        return view('dashboards.receptionist', [
-            'totalPatients' => Patient::count(),
-            'todayAppointments' => Appointment::whereDate('appointment_date', today())->count(),
-            'pendingAppointments' => Appointment::where('status', 'pending')->count(),
-            'doctors' => Doctor::count(),
+{
+    return view('dashboards.receptionist', [
+        'totalPatients' => Patient::count(),
 
-            'recentAppointments' => Appointment::with(['patient', 'doctor'])
-                ->latest()
-                ->take(5)
-                ->get(),
-        ]);
-    }
+        'todayAppointments' => Appointment::whereDate('appointment_date', today())->count(),
+
+        'pendingAppointments' => Appointment::where('status', 'pending')->count(),
+
+        'confirmedAppointments' => Appointment::where('status', 'confirmed')->count(),
+
+        'completedAppointments' => Appointment::where('status', 'completed')->count(),
+
+        'cancelledAppointments' => Appointment::where('status', 'cancelled')->count(),
+
+        'doctors' => Doctor::count(),
+
+        'recentAppointments' => Appointment::with(['patient', 'doctor'])
+            ->orderBy('appointment_date', 'desc')
+            ->orderBy('appointment_time', 'desc')
+            ->take(5)
+            ->get(),
+    ]);
+}
 
     public function doctor()
     {
