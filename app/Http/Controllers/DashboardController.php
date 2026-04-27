@@ -15,55 +15,60 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     public function admin()
-    {
-        return view('dashboards.admin', [
-            'totalPatients' => Patient::count(),
-            'totalDoctors' => Doctor::count(),
-            'totalAppointments' => Appointment::count(),
-            'totalUsers' => User::count(),
-            'totalDepartments' => Department::count(),
+{
+    return view('dashboards.admin', [
+        'totalPatients' => Patient::count(),
+        'totalDoctors' => Doctor::count(),
+        'totalAppointments' => Appointment::count(),
+        'totalUsers' => User::count(),
+        'totalDepartments' => Department::count(),
 
-            'totalReceptionists' => User::where('role', 'receptionist')->count(),
-            'totalCashiers' => User::where('role', 'cashier')->count(),
+        'totalReceptionists' => User::where('role', 'receptionist')->count(),
+        'totalCashiers' => User::where('role', 'cashier')->count(),
 
-            'totalPatientsTreated' => ConsultationNote::distinct('patient_id')->count('patient_id'),
+        'totalPatientsTreated' => ConsultationNote::distinct('patient_id')->count('patient_id'),
 
-            'totalRevenue' => Payment::sum('amount'),
-            'totalPayments' => Payment::sum('amount'),
+        'totalRevenue' => Payment::where('status', 'paid')->sum('amount'),
+        'totalPayments' => Payment::where('status', 'paid')->sum('amount'),
 
-            'todayRevenue' => Payment::whereDate('created_at', today())->sum('amount'),
+        'todayRevenue' => Payment::where('status', 'paid')
+            ->whereDate('payment_date', today())
+            ->sum('amount'),
 
-            'weeklyRevenue' => Payment::whereBetween('created_at', [
-                now()->startOfWeek(),
-                now()->endOfWeek(),
-            ])->sum('amount'),
+        'weeklyRevenue' => Payment::where('status', 'paid')
+            ->whereBetween('payment_date', [
+                now()->startOfWeek()->toDateString(),
+                now()->endOfWeek()->toDateString(),
+            ])
+            ->sum('amount'),
 
-            'monthlyRevenue' => Payment::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('amount'),
+        'monthlyRevenue' => Payment::where('status', 'paid')
+            ->whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
+            ->sum('amount'),
 
-            'pendingAppointments' => Appointment::where('status', 'pending')->count(),
-            'confirmedAppointments' => Appointment::where('status', 'confirmed')->count(),
-            'completedAppointments' => Appointment::where('status', 'completed')->count(),
-            'cancelledAppointments' => Appointment::where('status', 'cancelled')->count(),
+        'pendingAppointments' => Appointment::where('status', 'pending')->count(),
+        'confirmedAppointments' => Appointment::where('status', 'confirmed')->count(),
+        'completedAppointments' => Appointment::where('status', 'completed')->count(),
+        'cancelledAppointments' => Appointment::where('status', 'cancelled')->count(),
 
-            'malePatients' => Patient::whereIn('gender', ['male', 'Male', 'MALE'])->count(),
-            'femalePatients' => Patient::whereIn('gender', ['female', 'Female', 'FEMALE'])->count(),
+        'malePatients' => Patient::whereIn('gender', ['male', 'Male', 'MALE'])->count(),
+        'femalePatients' => Patient::whereIn('gender', ['female', 'Female', 'FEMALE'])->count(),
 
-            'maleDoctors' => Doctor::whereIn('gender', ['male', 'Male', 'MALE'])->count(),
-            'femaleDoctors' => Doctor::whereIn('gender', ['female', 'Female', 'FEMALE'])->count(),
+        'maleDoctors' => Doctor::whereIn('gender', ['male', 'Male', 'MALE'])->count(),
+        'femaleDoctors' => Doctor::whereIn('gender', ['female', 'Female', 'FEMALE'])->count(),
 
-            'recentAppointments' => Appointment::with(['patient', 'doctor', 'department'])
-                ->latest()
-                ->take(5)
-                ->get(),
+        'recentAppointments' => Appointment::with(['patient', 'doctor', 'department'])
+            ->latest()
+            ->take(5)
+            ->get(),
 
-            'recentPayments' => Payment::with(['patient', 'appointment'])
-                ->latest()
-                ->take(5)
-                ->get(),
-        ]);
-    }
+        'recentPayments' => Payment::with(['patient', 'appointment'])
+            ->latest()
+            ->take(5)
+            ->get(),
+    ]);
+}
 
     public function receptionist()
 {
