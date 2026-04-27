@@ -11,25 +11,25 @@ use Illuminate\Support\Facades\Auth;
 class PaymentController extends Controller
 {
     public function index(Request $request)
-{
-    $search = $request->search;
-    $status = $request->status;
-    $method = $request->payment_method;
+    {
+        $search = $request->search;
+        $status = $request->status;
+        $method = $request->payment_method;
 
-    $payments = Payment::when($search, function ($query) use ($search) {
-            $query->where('payment_number', 'like', "%{$search}%");
-        })
-        ->when($status, function ($query) use ($status) {
-            $query->where('status', $status);
-        })
-        ->when($method, function ($query) use ($method) {
-            $query->where('payment_method', $method);
-        })
-        ->latest()
-        ->paginate(10);
+        $payments = Payment::when($search, function ($query) use ($search) {
+                $query->where('payment_number', 'like', "%{$search}%");
+            })
+            ->when($status, function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->when($method, function ($query) use ($method) {
+                $query->where('payment_method', $method);
+            })
+            ->latest()
+            ->paginate(10);
 
-    return view('payments.index', compact('payments', 'search', 'status', 'method'));
-}
+        return view('payments.index', compact('payments', 'search', 'status', 'method'));
+    }
 
     public function create()
     {
@@ -55,21 +55,28 @@ class PaymentController extends Controller
             'payment_number' => 'PAY-' . str_pad((Payment::max('id') ?? 0) + 1, 4, '0', STR_PAD_LEFT),
             'patient_id' => $request->patient_id,
             'appointment_id' => $request->appointment_id,
-            'cashier_id' => Auth::id(),//saves cashier_id automatic
+
+            // Saves the cashier table ID, not the user ID
+            'cashier_id' => auth()->user()->cashier?->id,
+
             'amount' => $request->amount,
             'payment_method' => $request->payment_method,
             'payment_date' => $request->payment_date,
             'status' => $request->status,
             'reference' => $request->reference,
+
+            // Saves the logged-in user ID
             'received_by' => Auth::id(),
         ]);
 
-        return redirect()->route('payments.index')->with('success', 'Payment recorded successfully.');
+        return redirect()->route('payments.index')
+            ->with('success', 'Payment recorded successfully.');
     }
 
     public function show(Payment $payment)
     {
         $payment->load(['patient', 'appointment']);
+
         return view('payments.show', compact('payment'));
     }
 
@@ -93,23 +100,25 @@ class PaymentController extends Controller
             'reference' => 'nullable|string|max:255',
         ]);
 
-        $payment->update($request->only([
-            'patient_id',
-            'appointment_id',
-            'amount',
-            'payment_method',
-            'payment_date',
-            'status',
-            'reference',
-        ]));
+        $payment->update([
+            'patient_id' => $request->patient_id,
+            'appointment_id' => $request->appointment_id,
+            'amount' => $request->amount,
+            'payment_method' => $request->payment_method,
+            'payment_date' => $request->payment_date,
+            'status' => $request->status,
+            'reference' => $request->reference,
+        ]);
 
-        return redirect()->route('payments.index')->with('success', 'Payment updated successfully.');
+        return redirect()->route('payments.index')
+            ->with('success', 'Payment updated successfully.');
     }
 
     public function destroy(Payment $payment)
     {
         $payment->delete();
 
-        return redirect()->route('payments.index')->with('success', 'Payment deleted successfully.');
+        return redirect()->route('payments.index')
+            ->with('success', 'Payment deleted successfully.');
     }
 }
