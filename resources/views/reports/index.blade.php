@@ -20,7 +20,6 @@
                 <select name="format" class="form-select">
                     <option value="pdf">PDF</option>
                     <option value="csv">CSV</option>
-                    <option value="xlsx">Excel (.xlsx)</option>
                 </select>
                 <button class="btn btn-primary">Generate</button>
             </form>
@@ -37,7 +36,6 @@
                 <select name="format" class="form-select">
                     <option value="pdf">PDF</option>
                     <option value="csv">CSV</option>
-                    <option value="xlsx">Excel (.xlsx)</option>
                 </select>
                 <button class="btn btn-success">Generate</button>
             </form>
@@ -54,7 +52,6 @@
                 <select name="format" class="form-select">
                     <option value="pdf">PDF</option>
                     <option value="csv">CSV</option>
-                    <option value="xlsx">Excel (.xlsx)</option>
                 </select>
                 <button class="btn btn-warning">Generate</button>
             </form>
@@ -71,7 +68,6 @@
                 <select name="format" class="form-select">
                     <option value="pdf">PDF</option>
                     <option value="csv">CSV</option>
-                    <option value="xlsx">Excel (.xlsx)</option>
                 </select>
                 <button class="btn btn-dark">Generate</button>
             </form>
